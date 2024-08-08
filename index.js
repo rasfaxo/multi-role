@@ -7,6 +7,7 @@ import SequelizeStore from "connect-session-sequelize";
 import UserRoute from "./routes/UserRoute.js"
 import ProductRoute from "./routes/ProductRoute.js"
 import AuthRoute from './routes/AuthRoute.js';
+import helmet from "helmet";
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ const store = new sessionStore({
 // })();
 
 const port = process.env.APP_PORT;
+const fe_port = process.env.FE_PORT;
 app.use(session({
     secret: process.env.SESS_SECRET,
     resave: true,
@@ -33,8 +35,17 @@ app.use(session({
 }))
 app.use(cors({
     credentials: true,
-    origin: 'http//localhost:3000'
+    origin: `http://localhost:${fe_port}`
 }));
+app.use(
+    helmet({
+    frameguard: {
+        action: 'sameorigin'
+    },
+    referrerPolicy: {
+        policy: 'same-origin'
+    }
+}))
 app.use(express.json());
 app.use(UserRoute)
 app.use(ProductRoute)
