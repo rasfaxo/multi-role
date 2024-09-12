@@ -24,6 +24,16 @@ const store = new sessionStore({
 
 const port = process.env.APP_PORT;
 const fe_port = process.env.FE_PORT;
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: "Too many requests, please try again later."
+});
+
+app.use(limiter);
+app.use(hpp());
+
 app.use(session({
     secret: process.env.SESS_SECRET,
     resave: true,
@@ -44,6 +54,19 @@ app.use(
     },
     referrerPolicy: {
         policy: 'same-origin'
+    },
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "trusted-cdn.com"],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: []
+        }
+    },
+    hsts: {
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true,
+        preload: true
     }
 }))
 app.use(express.json());
